@@ -466,7 +466,7 @@ Globals.DoorsNotify = function(NotifyOptions)
         end)
 end
 
-Globals.STX = loadstring(game:HttpGet("https://raw.githubusercontent.com/bark2star/tie.exit/refs/heads/main/Components/STX.luau"))()
+Globals.STX = loadstring(game:HttpGet("https://raw.githubusercontent.com/bocaj111004/Abysall/refs/heads/main/Components/STX.luau"))()
 Functions.Notify = function(Settings)
         local HiddenContainer = GetHiddenContainer()
 
@@ -491,7 +491,7 @@ Functions.Notify = function(Settings)
                         end
                 end
                 Globals.DoorsNotify({
-                        Title = "tie.exit",
+                        Title = "Abysall Hub",
                         Description = Settings.Title,
                         Reason = Settings.Body,
                         Style = IsEntity and "WARNING" or "NOTIFICATION",
@@ -508,13 +508,13 @@ Functions.Notify = function(Settings)
 
                 if Settings.Image then
                         Globals.STX:Notify(
-                                {Title = "tie.exit", Description = Settings.Title .. "\n" .. Settings.Body},
+                                {Title = "Abysall Hub", Description = Settings.Title .. "\n" .. Settings.Body},
                                 {OutlineColor = Library.Scheme.AccentColor,Time = Settings.Time or 5, Type = "image"},
                                 {Image = Settings.Image, ImageColor = Color3.fromRGB(255, 255, 255)}
                         )
                 else
                         Globals.STX:Notify(
-                                {Title = "tie.exit", Description = Settings.Title .. "\n" .. Settings.Body},
+                                {Title = "Abysall Hub", Description = Settings.Title .. "\n" .. Settings.Body},
                                 {OutlineColor = Library.Scheme.AccentColor,Time = Settings.Time or 5, Type = "default"}
                         )
                 end
@@ -1012,8 +1012,8 @@ Functions.GetRandomCode = function()
 end
 
 local Window = Library:CreateWindow({
-        Title = "tie.exit",
-        Footer = "dsc.gg/zV2DSVpcs",
+        Title = "Abysall Hub",
+        Footer = "dsc.gg/abysallhub",
         NotifySide = "Right",
         ShowCustomCursor = false,
         AutoShow = true,
@@ -1191,6 +1191,11 @@ Groupboxes.Self_Automation:AddToggle("AutoLibraryGuessCode", {
 Groupboxes.Self_Automation:AddDivider()
 Groupboxes.Self_Automation:AddToggle("AutoInteractToggle", {
         Text = "Auto Interact", Default = false, Tooltip = "Automatically triggers nearby prompts."
+})
+Groupboxes.Self_Automation:AddToggle("AutoInteractChairs", {
+        Text = "Auto Interact Chairs",
+        Default = false,
+        Tooltip = "Automatically interacts with Regal Chairs."
 })
 Toggles.AutoInteractToggle:AddKeyPicker("AutoInteractKeybind", {
         Text = "Auto Interact", Default = "R",
@@ -2510,7 +2515,7 @@ Groupboxes.Floors_Farming:AddButton({
         DoubleClick = true,
         Tooltip = "Automatically farms deaths, joining new runs.",
         Func = function()
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/bark2star/tie.exit/refs/heads/main/Scripts/DeathFarm.luau"))()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/bocaj111004/Abysall/refs/heads/main/Scripts/DeathFarm.luau"))()
         end,
 
         Disabled = not Functions.CheckCompatability({"fireproximityprompt", "firesignal"}),
@@ -2522,7 +2527,7 @@ Groupboxes.Floors_Farming:AddButton({
         Tooltip = "Copies the death farm loadstring to your clipboard.",
         Func = function()
                 toclipboard([==[
-                        loadstring(game:HttpGet("https://raw.githubusercontent.com/bark2star/tie.exit/refs/heads/main/Scripts/DeathFarm.luau"))()
+                        loadstring(game:HttpGet("https://raw.githubusercontent.com/bocaj111004/Abysall/refs/heads/main/Scripts/DeathFarm.luau"))()
                 ]==])
                 Library:Notify("Loadstring has been copied to your clipboard.")
         end,
@@ -3029,7 +3034,7 @@ Functions.HandleCharacter = function(NewCharacter)
                 end
 
                 if Globals.SelfKilled and Globals.MainUI:FindFirstChild("Statistics") then
-                        Globals.MainUI.Statistics.Death.Text = "Died to tie.exit"
+                        Globals.MainUI.Statistics.Death.Text = "Died to Abysall Hub"
                 end
 
                 local MainFrame = Globals.MainUI:FindFirstChild("MainFrame")
@@ -4158,6 +4163,10 @@ Functions.TriggerPrompt = function(Prompt)
         if AutoInteractBlacklist[Prompt.Name] then return end
         if not Prompt or not Prompt.Parent then return end
         if TriggerDebounce then return end
+
+        if Prompt:FindFirstAncestor("Regal_Chair") and not Toggles.AutoInteractChairs.Value then
+                return
+        end
 
         local ParentItem = Functions.HasItem(Prompt.Parent.Name)
         if ParentItem and ParentItem:GetAttribute("Durability") and ParentItem:GetAttribute("DurabilityMax")
