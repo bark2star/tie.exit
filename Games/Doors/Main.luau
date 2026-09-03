@@ -1198,7 +1198,7 @@ Toggles.AutoInteractToggle:AddKeyPicker("AutoInteractKeybind", {
 })
 Groupboxes.Self_Automation:AddDropdown("AutoInteractIgnoreList", {
         Text = "Ignore List",
-        Values = { "Glitch Fragments", "Jeff Items", "Dropped Items", "Currency", "Minecarts", "Locks", "Chairs", "Large Printers", "Fish Tanks", "Trash Cans", "Trash Live" },
+        Values = { "Glitch Fragments", "Jeff Items", "Dropped Items", "Currency", "Minecarts", "Locks", "Chairs", "Large Printers", "Fish Tanks", "Trash Cans" },
         Default = { "Glitch Fragments", "Jeff Items", "Dropped Items" },
         Multi = true, AllowNull = true
 })
@@ -1648,6 +1648,39 @@ Options.TransparentHidingSpotsSlider:OnChanged(function(Value)
 end)
 
 Groupboxes.Visuals_Effects:AddDivider()
+Groupboxes.Visuals_Effects:AddToggle("DeleteTrashLiveToggle", {
+        Text = "Delete Trash Live", Default = false, Tooltip = "Deletes Trash Live objects on your client."
+})
+
+local function DeleteTrashLive(Object)
+        if not Object or not Toggles.DeleteTrashLiveToggle.Value then return end
+
+        local Name = Object.Name
+        if Name:match("^Binder([1-9]|1[0-9]|20)_TrashLive$")
+                or Name:match("^Shoe([1-9]|1[0-9]|20)_TrashLive$")
+                or Name:match("^Shelf([1-9]|1[0-9]|20)_TrashLive$")
+        then
+                Object:Destroy()
+        end
+end
+
+for _, Object in Services.Workspace:GetDescendants() do
+        DeleteTrashLive(Object)
+end
+
+Connections.DeleteTrashLive = Services.Workspace.DescendantAdded:Connect(function(Object)
+        if Toggles.DeleteTrashLiveToggle.Value then
+                DeleteTrashLive(Object)
+        end
+end)
+
+Toggles.DeleteTrashLiveToggle:OnChanged(function(Value)
+        if not Value then return end
+        for _, Object in Services.Workspace:GetDescendants() do
+                DeleteTrashLive(Object)
+        end
+end)
+
 Groupboxes.Visuals_Effects:AddToggle("DisableGlitchJumpscare",   { Text = "Disable Glitch Jumpscare",   Default = false, Tooltip = "Disables the jumpscare from 'Glitch'" })
 Groupboxes.Visuals_Effects:AddToggle("DisableTimothyJumpscare",  { Text = "Disable Timothy Jumpscare",  Default = false, Tooltip = "Disables the jumpscare from 'Timothy'" })
 Groupboxes.Visuals_Effects:AddToggle("DisableVoidJumpscare",     { Text = "Disable Void Jumpscare",     Default = false, Tooltip = "Disables the jumpscare from 'Void'" })
@@ -3638,6 +3671,13 @@ Functions.HandleObject = function(Object)
         elseif Name == "MouseHole" then
                 if Toggles.ChestESPToggle.Value then Functions.AddESP({ Object = Object, Text = "Mouse", Color = Options.ChestESPColor.Value }, true) end
                 table.insert(Objects.Chests, Object)
+        elseif (Name == "ItemDropPickup" and Object.Parent and (Object.Parent.Name == "PaperPlane" or Object.Parent.Name == "Pizza"))
+                or (Name == "WaterJug" and Object.Parent and Object.Parent.Name == "ArchivesWaterCooler") then
+                local Label = Name == "WaterJug" and "Water Jug" or Object.Parent.Name == "PaperPlane" and "Paper Plane" or "Pizza"
+                if Toggles.ItemESPToggle.Value then
+                        Functions.AddESP({ Object = Object, Text = Label, Color = Options.ItemESPColor.Value }, Object:GetAttribute("ParentRoom") ~= nil)
+                end
+                table.insert(Objects.Items, Object)
         elseif ItemNames[Name] and Object:FindFirstChild("ModulePrompt") then
                 if Toggles.ItemESPToggle.Value then Functions.AddESP({ Object = Object, Text = ItemNames[Name], Color = Options.ItemESPColor.Value }, Object:GetAttribute("ParentRoom") ~= nil) end
                 if Name == "LotusHolder" or Name == "LotusPetalPickup" then
@@ -4164,11 +4204,10 @@ Functions.TriggerPrompt = function(Prompt)
                 return Prompt:FindFirstAncestor(Name) ~= nil
         end
 
-        if (HasAncestor("Regal_Chair") and IgnoreList["Chairs"])
+        if ((HasAncestor("Regal_Chair") or HasAncestor("ArchivesChair")) and IgnoreList["Chairs"])
                 or (HasAncestor("ArchivesLargePrinter") and IgnoreList["Large Printers"])
                 or (HasAncestor("ArchivesFihTank") and IgnoreList["Fish Tanks"])
                 or (HasAncestor("ArchivesTrashcan") and IgnoreList["Trash Cans"])
-                or (HasAncestor("Binder9_TrashLive") and IgnoreList["Trash Live"])
         then
                 return
         end
