@@ -1192,18 +1192,13 @@ Groupboxes.Self_Automation:AddDivider()
 Groupboxes.Self_Automation:AddToggle("AutoInteractToggle", {
         Text = "Auto Interact", Default = false, Tooltip = "Automatically triggers nearby prompts."
 })
-Groupboxes.Self_Automation:AddToggle("AutoInteractChairs", {
-        Text = "Auto Interact Chairs",
-        Default = false,
-        Tooltip = "Automatically interacts with Regal Chairs."
-})
 Toggles.AutoInteractToggle:AddKeyPicker("AutoInteractKeybind", {
         Text = "Auto Interact", Default = "R",
         Mode = Library.IsMobile and "Toggle" or "Hold", SyncToggleState = true
 })
 Groupboxes.Self_Automation:AddDropdown("AutoInteractIgnoreList", {
         Text = "Ignore List",
-        Values = { "Glitch Fragments", "Jeff Items", "Dropped Items", "Currency", "Minecarts", "Locks" },
+        Values = { "Glitch Fragments", "Jeff Items", "Dropped Items", "Currency", "Minecarts", "Locks", "Chairs", "Large Printers", "Fish Tanks", "Trash Cans", "Trash Live" },
         Default = { "Glitch Fragments", "Jeff Items", "Dropped Items" },
         Multi = true, AllowNull = true
 })
@@ -4164,7 +4159,17 @@ Functions.TriggerPrompt = function(Prompt)
         if not Prompt or not Prompt.Parent then return end
         if TriggerDebounce then return end
 
-        if Prompt:FindFirstAncestor("Regal_Chair") and not Toggles.AutoInteractChairs.Value then
+        local IgnoreList = Options.AutoInteractIgnoreList.Value
+        local function HasAncestor(Name)
+                return Prompt:FindFirstAncestor(Name) ~= nil
+        end
+
+        if (HasAncestor("Regal_Chair") and IgnoreList["Chairs"])
+                or (HasAncestor("ArchivesLargePrinter") and IgnoreList["Large Printers"])
+                or (HasAncestor("ArchivesFihTank") and IgnoreList["Fish Tanks"])
+                or (HasAncestor("ArchivesTrashcan") and IgnoreList["Trash Cans"])
+                or (HasAncestor("Binder9_TrashLive") and IgnoreList["Trash Live"])
+        then
                 return
         end
 
