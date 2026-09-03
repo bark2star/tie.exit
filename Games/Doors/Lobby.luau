@@ -466,7 +466,7 @@ Globals.DoorsNotify = function(NotifyOptions)
         end)
 end
 
-Globals.STX = loadstring(game:HttpGet("https://raw.githubusercontent.com/bark2star/tie.exit/refs/heads/main/Components/STX.luau"))()
+Globals.STX = loadstring(game:HttpGet("https://raw.githubusercontent.com/bocaj111004/Abysall/refs/heads/main/Components/STX.luau"))()
 Functions.Notify = function(Settings)
         local HiddenContainer = GetHiddenContainer()
 
@@ -491,7 +491,7 @@ Functions.Notify = function(Settings)
                         end
                 end
                 Globals.DoorsNotify({
-                        Title = "tie.exit",
+                        Title = "Abysall Hub",
                         Description = Settings.Title,
                         Reason = Settings.Body,
                         Style = IsEntity and "WARNING" or "NOTIFICATION",
@@ -508,13 +508,13 @@ Functions.Notify = function(Settings)
 
                 if Settings.Image then
                         Globals.STX:Notify(
-                                {Title = "tie.exit", Description = Settings.Title .. "\n" .. Settings.Body},
+                                {Title = "Abysall Hub", Description = Settings.Title .. "\n" .. Settings.Body},
                                 {OutlineColor = Library.Scheme.AccentColor,Time = Settings.Time or 5, Type = "image"},
                                 {Image = Settings.Image, ImageColor = Color3.fromRGB(255, 255, 255)}
                         )
                 else
                         Globals.STX:Notify(
-                                {Title = "tie.exit", Description = Settings.Title .. "\n" .. Settings.Body},
+                                {Title = "Abysall Hub", Description = Settings.Title .. "\n" .. Settings.Body},
                                 {OutlineColor = Library.Scheme.AccentColor,Time = Settings.Time or 5, Type = "default"}
                         )
                 end
@@ -1012,8 +1012,8 @@ Functions.GetRandomCode = function()
 end
 
 local Window = Library:CreateWindow({
-        Title = "tie.exit",
-        Footer = "dsc.gg/zV2DSVpcs",
+        Title = "Abysall Hub",
+        Footer = "dsc.gg/abysallhub",
         NotifySide = "Right",
         ShowCustomCursor = false,
         AutoShow = true,
@@ -1198,7 +1198,7 @@ Toggles.AutoInteractToggle:AddKeyPicker("AutoInteractKeybind", {
 })
 Groupboxes.Self_Automation:AddDropdown("AutoInteractIgnoreList", {
         Text = "Ignore List",
-        Values = { "Glitch Fragments", "Jeff Items", "Dropped Items", "Currency", "Minecarts", "Locks" },
+        Values = { "Glitch Fragments", "Jeff Items", "Dropped Items", "Currency", "Minecarts", "Locks", "Chairs", "Large Printers", "Fish Tanks", "Trash Cans" },
         Default = { "Glitch Fragments", "Jeff Items", "Dropped Items" },
         Multi = true, AllowNull = true
 })
@@ -1648,6 +1648,33 @@ Options.TransparentHidingSpotsSlider:OnChanged(function(Value)
 end)
 
 Groupboxes.Visuals_Effects:AddDivider()
+Groupboxes.Visuals_Effects:AddToggle("DeleteTrashLiveToggle", {
+        Text = "Delete Trash Live", Default = false, Tooltip = "Deletes Trash Live objects on your client."
+})
+
+local function DeleteTrashLive(Object)
+        if Object and Object.Name == "Binder9_TrashLive" and Toggles.DeleteTrashLiveToggle.Value then
+                Object:Destroy()
+        end
+end
+
+for _, Object in Services.Workspace:GetDescendants() do
+        DeleteTrashLive(Object)
+end
+
+Connections.DeleteTrashLive = Services.Workspace.DescendantAdded:Connect(function(Object)
+        if Toggles.DeleteTrashLiveToggle.Value then
+                DeleteTrashLive(Object)
+        end
+end)
+
+Toggles.DeleteTrashLiveToggle:OnChanged(function(Value)
+        if not Value then return end
+        for _, Object in Services.Workspace:GetDescendants() do
+                DeleteTrashLive(Object)
+        end
+end)
+
 Groupboxes.Visuals_Effects:AddToggle("DisableGlitchJumpscare",   { Text = "Disable Glitch Jumpscare",   Default = false, Tooltip = "Disables the jumpscare from 'Glitch'" })
 Groupboxes.Visuals_Effects:AddToggle("DisableTimothyJumpscare",  { Text = "Disable Timothy Jumpscare",  Default = false, Tooltip = "Disables the jumpscare from 'Timothy'" })
 Groupboxes.Visuals_Effects:AddToggle("DisableVoidJumpscare",     { Text = "Disable Void Jumpscare",     Default = false, Tooltip = "Disables the jumpscare from 'Void'" })
@@ -2510,7 +2537,7 @@ Groupboxes.Floors_Farming:AddButton({
         DoubleClick = true,
         Tooltip = "Automatically farms deaths, joining new runs.",
         Func = function()
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/bark2star/tie.exit/refs/heads/main/Scripts/DeathFarm.luau"))()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/bocaj111004/Abysall/refs/heads/main/Scripts/DeathFarm.luau"))()
         end,
 
         Disabled = not Functions.CheckCompatability({"fireproximityprompt", "firesignal"}),
@@ -2522,7 +2549,7 @@ Groupboxes.Floors_Farming:AddButton({
         Tooltip = "Copies the death farm loadstring to your clipboard.",
         Func = function()
                 toclipboard([==[
-                        loadstring(game:HttpGet("https://raw.githubusercontent.com/bark2star/tie.exit/refs/heads/main/Scripts/DeathFarm.luau"))()
+                        loadstring(game:HttpGet("https://raw.githubusercontent.com/bocaj111004/Abysall/refs/heads/main/Scripts/DeathFarm.luau"))()
                 ]==])
                 Library:Notify("Loadstring has been copied to your clipboard.")
         end,
@@ -3029,7 +3056,7 @@ Functions.HandleCharacter = function(NewCharacter)
                 end
 
                 if Globals.SelfKilled and Globals.MainUI:FindFirstChild("Statistics") then
-                        Globals.MainUI.Statistics.Death.Text = "Died to tie.exit"
+                        Globals.MainUI.Statistics.Death.Text = "Died to Abysall Hub"
                 end
 
                 local MainFrame = Globals.MainUI:FindFirstChild("MainFrame")
@@ -4158,6 +4185,19 @@ Functions.TriggerPrompt = function(Prompt)
         if AutoInteractBlacklist[Prompt.Name] then return end
         if not Prompt or not Prompt.Parent then return end
         if TriggerDebounce then return end
+
+        local IgnoreList = Options.AutoInteractIgnoreList.Value
+        local function HasAncestor(Name)
+                return Prompt:FindFirstAncestor(Name) ~= nil
+        end
+
+        if ((HasAncestor("Regal_Chair") or HasAncestor("ArchivesChair")) and IgnoreList["Chairs"])
+                or (HasAncestor("ArchivesLargePrinter") and IgnoreList["Large Printers"])
+                or (HasAncestor("ArchivesFihTank") and IgnoreList["Fish Tanks"])
+                or (HasAncestor("ArchivesTrashcan") and IgnoreList["Trash Cans"])
+        then
+                return
+        end
 
         local ParentItem = Functions.HasItem(Prompt.Parent.Name)
         if ParentItem and ParentItem:GetAttribute("Durability") and ParentItem:GetAttribute("DurabilityMax")
